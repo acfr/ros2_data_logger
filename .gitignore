@@ -1,0 +1,28 @@
+# Build artifacts
+build/
+install/
+log/
+debian/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Deployment config (contains credentials)
+scripts/.deploy_config
+
+# Generated packages
+*.deb
+*.ddeb
+
+scripts
+
+.obj-*

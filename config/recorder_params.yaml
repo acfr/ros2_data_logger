@@ -16,7 +16,7 @@ recorder:
       compression_queue_size: 10
       compression_threads: 2
       compression_threads_priority: -1
-      qos_profile_overrides_path: "recorder_qos_profile.yaml"
+      qos_profile_overrides_path: "/home/jerome/gh_ws/src/ros2_data_logger/config/recorder_qos_profile.yaml"
       include_hidden_topics: true
       include_unpublished_topics: true
       ignore_leaf_topics: false

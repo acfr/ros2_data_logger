@@ -169,7 +169,7 @@ recorder:
       compression_mode: "file"
       compression_format: "zstd"
       compression_threads: 2
-    
+
     storage:
       storage_id: "mcap"
       max_bagfile_size: 5368709120  # 5 GB
