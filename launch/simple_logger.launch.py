@@ -1,9 +1,3 @@
-# Copyright 2024 -
-# Australian Centre for Robotic
-#
-# Authored by Jerome Justin
-#
-
 import datetime
 import os
 
