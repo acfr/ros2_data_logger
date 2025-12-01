@@ -43,6 +43,13 @@ def launch_setup(context, *args, **kwargs):
     recorder_params = dump_params(params_file_uri, "recorder")
     recorder_params[0]["storage"]["uri"] = container_rosbag_dir
 
+    # Define the config for recorder qos file
+    recorder_params[0]["record"]["qos_profile_overrides_path"] = os.path.join(
+        get_package_share_directory("ros2_data_logger"),
+        "config",
+        "recorder_qos_profiles.yaml",
+    )
+
     composable_logger = ComposableNode(
         package="rosbag2_transport",
         plugin="rosbag2_transport::Recorder",
