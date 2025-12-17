@@ -390,10 +390,117 @@ topics:
 - Use faster storage (NVMe SSD)
 - Reduce `compression_queue_size` if memory-constrained
 
+## Installation
+
+### From Binary Package (Recommended)
+
+The easiest way to install `ros2_data_logger` is from the ACFR binary repository:
+
+```bash
+# Add the ACFR repository
+echo "deb [trusted=yes] https://data.acfr.usyd.edu.au/ubuntu-repo/jazzy ./" | sudo tee /etc/apt/sources.list.d/acfr-ros2.list
+
+# Update package list
+sudo apt update
+
+# Install the package
+sudo apt install ros-jazzy-ros2-data-logger
+```
+
+**Supported distributions:**
+- ROS2 Jazzy (Ubuntu 24.04)
+
+### From Source
+
+```bash
+# Create workspace
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
+
+# Clone repository
+git clone https://github.com/acfr/ros2_data_logger.git
+
+# Install dependencies
+cd ~/ros2_ws
+rosdep install --from-paths src --ignore-src -r -y
+
+# Build
+colcon build --packages-select ros2_data_logger
+
+# Source
+source install/setup.bash
+```
+
+## Building and Deploying Binary Packages
+
+This package includes scripts for building Debian packages and deploying them to the ACFR package repository.
+
+### Build Binary Package
+
+To build a Debian package for distribution:
+
+```bash
+# Build for default distro (jazzy)
+./scripts/build_deb.sh
+
+# Build with explicit distro specification
+./scripts/build_deb.sh --ros-distro jazzy
+```
+
+The generated `.deb` file will be in `debian_packages/`.
+
+**Requirements:**
+- `python3-bloom` - ROS package release tools
+- `fakeroot` - For building packages without root
+- `dpkg-dev` - Debian package development tools
+
+### Deploy to Repository
+
+Deploy the built package to avocado.acfr.usyd.edu.au:
+
+```bash
+# Deploy with default settings
+./scripts/deploy.sh
+
+# Deploy with custom user
+./scripts/deploy.sh --user username --ros-distro jazzy
+```
+
+This will:
+1. Copy `.deb` packages to the server
+2. Generate APT repository metadata
+3. Create/update repository index page
+
+### Build and Deploy Together
+
+For convenience, use the combined script:
+
+```bash
+./scripts/build_and_deploy.sh --ros-distro jazzy
+```
+
+### CI/CD Pipeline
+
+The package includes a GitHub Actions workflow that automatically:
+- Builds Debian packages on every push to `main`
+- Tests package installation
+- Deploys to avocado.acfr.usyd.edu.au
+- Creates GitHub releases for version tags
+
+**Required GitHub Secrets:**
+- `AVOCADO_SSH_KEY` - SSH private key for deployment
+- `AVOCADO_USER` - Username for SSH connection
+
+To trigger a release:
+```bash
+git tag -a v0.1.0 -m "Release version 0.1.0"
+git push origin v0.1.0
+```
+
 ## Related Packages
 
 - [`rosbag2`](https://github.com/ros2/rosbag2) - ROS2 bag recording infrastructure
 
 ## License
 
-Copyright 2024 Australian Centre for Robotic Vision
+Apache 2.0

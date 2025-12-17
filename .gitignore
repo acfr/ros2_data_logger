@@ -3,6 +3,7 @@ build/
 install/
 log/
 debian/
+build_deb/
 
 # IDE files
 .vscode/
@@ -22,7 +23,6 @@ scripts/.deploy_config
 # Generated packages
 *.deb
 *.ddeb
-
-scripts
+debian_packages/
 
 .obj-*
