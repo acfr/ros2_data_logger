@@ -1,11 +1,12 @@
 #!/bin/bash
 # Build script for creating Debian package of ros2_data_logger
-# Usage: ./scripts/build_deb.sh [--ros-distro humble|iron|jazzy]
+# Usage: ./scripts/build_deb.sh [--ros-distro humble|iron|jazzy] [--arch amd64|arm64|all]
 
 set -e
 
-# Default ROS distro
+# Default ROS distro and architecture (default to "all" to build both architectures)
 ROS_DISTRO="${ROS_DISTRO:-jazzy}"
+ARCH="${ARCH:-all}"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -14,9 +15,13 @@ while [[ $# -gt 0 ]]; do
             ROS_DISTRO="$2"
             shift 2
             ;;
+        --arch)
+            ARCH="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--ros-distro humble|iron|jazzy]"
+            echo "Usage: $0 [--ros-distro humble|iron|jazzy] [--arch amd64|arm64|all]"
             exit 1
             ;;
     esac
@@ -31,6 +36,7 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}Building ros2_data_logger Debian package${NC}"
 echo -e "${BLUE}ROS Distro: ${ROS_DISTRO}${NC}"
+echo -e "${BLUE}Architecture: ${ARCH}${NC}"
 echo -e "${BLUE}========================================${NC}"
 
 # Get the script directory and project root
@@ -81,11 +87,22 @@ mkdir -p "${BUILD_DIR}"
 bloom-generate rosdebian --os-name ubuntu --os-version noble --ros-distro ${ROS_DISTRO}
 
 # Build the Debian package
-echo -e "${GREEN}Building Debian package...${NC}"
-fakeroot debian/rules binary
+echo -e "${GREEN}Building Debian package for ${ARCH}...${NC}"
+if [ "${ARCH}" == "all" ]; then
+    # Build for current architecture when "all" is specified (build_and_deploy.sh handles multi-arch)
+    CURRENT_ARCH="$(dpkg --print-architecture)"
+    echo -e "${YELLOW}Building for current architecture: ${CURRENT_ARCH}${NC}"
+    echo -e "${YELLOW}Note: Use build_and_deploy.sh to build both architectures${NC}"
+    DEB_BUILD_OPTIONS="nocheck" DEB_BUILD_ARCH="${CURRENT_ARCH}" fakeroot debian/rules binary
+    # Update ARCH for file organization
+    ARCH="${CURRENT_ARCH}"
+else
+    # Build for specific architecture
+    DEB_BUILD_OPTIONS="nocheck" DEB_BUILD_ARCH="${ARCH}" fakeroot debian/rules binary
+fi
 
-# Move the .deb file to a known location
-DEB_OUTPUT_DIR="${PROJECT_ROOT}/debian_packages"
+# Move the .deb file to a known location with architecture subfolder
+DEB_OUTPUT_DIR="${PROJECT_ROOT}/debian_packages/${ARCH}"
 mkdir -p "${DEB_OUTPUT_DIR}"
 
 # Find and move the generated .deb files
@@ -94,6 +111,7 @@ find "${WORKSPACE_ROOT}" -maxdepth 2 -name "ros-${ROS_DISTRO}-ros2-data-logger*.
 if ls "${DEB_OUTPUT_DIR}"/ros-${ROS_DISTRO}-ros2-data-logger*.deb 1> /dev/null 2>&1; then
     echo -e "${GREEN}========================================${NC}"
     echo -e "${GREEN}Debian package built successfully!${NC}"
+    echo -e "${GREEN}Architecture: ${ARCH}${NC}"
     echo -e "${GREEN}Location: ${DEB_OUTPUT_DIR}${NC}"
     ls -lh "${DEB_OUTPUT_DIR}"/*.deb
     echo -e "${GREEN}========================================${NC}"
